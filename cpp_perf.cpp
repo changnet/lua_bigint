@@ -1,4 +1,7 @@
-#include "BigInt.hpp"
+#include "./faheel/BigInt.hpp"
+#include "./kasparsklavins/bigint.h"
+#include "./kedixa/unsigned_bigint.h"
+
 #include <chrono>
 #include <string>
 #include <random>
@@ -17,6 +20,66 @@ typedef std::chrono::microseconds Microsec;
         std::cout << name << " " << what << " time elapsed " \
         << ms.count() << "µs" << std::endl;\
     } while (0)
+
+template<class T>
+void test(const char *name, const std::string &base, const std::string &mul)
+{
+    Clock::time_point last;
+    Clock::time_point curr;
+
+    const BigInt b(base);
+
+    // test string to big int
+    TIME_BEG;
+    for (int i = 0;i < TEST_TIMES;i ++)
+    {
+        BigInt v(base);
+    }
+    TIME_END(name, "create");
+
+    // test add
+    TIME_BEG;
+    BigInt sum;
+    for (int i = 0;i < TEST_TIMES;i ++)
+    {
+        sum += base;
+    }
+    TIME_END(name, "add");
+
+    // test dec
+    TIME_BEG;
+    for (int i = 0;i < TEST_TIMES;i ++)
+    {
+        sum -= base;
+    }
+    TIME_END(name, "dec");
+
+    // test mul
+    TIME_BEG;
+    for (int i = 0;i < TEST_TIMES;i ++)
+    {
+        BigInt v(base);
+        v = v * mul;
+    }
+    TIME_END(name, "mul");
+
+    // test div
+    TIME_BEG;
+    for (int i = 0;i < TEST_TIMES;i ++)
+    {
+        BigInt v(base);
+        v = v / mul;
+    }
+    TIME_END(name, "div");
+
+    // test to_string
+    TIME_BEG;
+    for (int i = 0;i < TEST_TIMES;i ++)
+    {
+        std::string &&s = b.to_string();
+    }
+    TIME_END(name, "to_string");
+}
 
 void test_faheel(const std::string &base, const std::string &mul, int seed)
 {
@@ -95,12 +158,13 @@ int main()
         mul.append(std::to_string(int(u(e))));
     }
 
-    int seed = int(u(e) * 10);
-
     // 测试加减法
     // 测试乘除法
     // 测试to_string
 
-    test_faheel(base, mul, seed);
+    test<BigInt>("faheel", base, mul);
+    test<Dodecahedron::Bigint>("kasparsklavins", base, mul);
+    test<kedixa::unsigned_bigint>("kedixa", base, mul);
+    // test_faheel(base, mul, seed);
     return 0;
 }
