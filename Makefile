@@ -55,7 +55,7 @@ $(TARGET_A): $(STATICOBJS)
 	$(RANLIB) $@
 
 test:
-	g++ -std=c++11 -Wall -g -o cpp_perf cpp_perf.cpp
+	g++ -std=c++11 -I/home/xzc/Downloads/boost_1_74_0 -Wall -g3 -O0 -o cpp_perf ./kedixa/unsigned_bigint.cpp ./kasparsklavins/bigint.cpp cpp_perf.cpp
 	./cpp_perf
 
 clean:
