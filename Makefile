@@ -54,8 +54,19 @@ $(TARGET_A): $(STATICOBJS)
 	$(AR) $@ $(STATICOBJS)
 	$(RANLIB) $@
 
+# export BOOST_INC=../boost_1_74_0
+
+# install gmp: https://gmplib.org/
+# tar -xf gmp-6.2.0.tar.xz
+# cd gmp-6.2.0
+# ./configure --enable-cxx
+# make
+# make check
+# make install
 test:
-	g++ -std=c++11 -I/home/xzc/Downloads/boost_1_74_0 -Wall -g3 -O0 -o cpp_perf ./kedixa/unsigned_bigint.cpp ./kasparsklavins/bigint.cpp cpp_perf.cpp
+	g++ -std=c++11 -I$(BOOST_INC) -Wall -g3 -O0 -o cpp_perf \
+		./kedixa/unsigned_bigint.cpp ./kasparsklavins/bigint.cpp cpp_perf.cpp \
+		-lgmpxx -lgmp
 	./cpp_perf
 
 clean:
