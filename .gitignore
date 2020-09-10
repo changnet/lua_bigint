@@ -31,4 +31,4 @@
 *.out
 *.app
 
-cpp_perf
+test_lib_perf

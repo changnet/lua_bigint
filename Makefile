@@ -63,11 +63,13 @@ $(TARGET_A): $(STATICOBJS)
 # make
 # make check
 # make install
-test:
-	g++ -std=c++11 -I$(BOOST_INC) -Wall -g3 -O0 -o cpp_perf \
-		./kedixa/unsigned_bigint.cpp ./kasparsklavins/bigint.cpp cpp_perf.cpp \
+libperf:
+	g++ -std=c++11 -I$(BOOST_INC) -Wall -g3 -O2 -o test_lib_perf \
+		./lib_perf/kedixa/unsigned_bigint.cpp \
+		./lib_perf/kasparsklavins/bigint.cpp \
+		./lib_perf/lib_perf.cpp \
 		-lgmpxx -lgmp
-	./cpp_perf
+	./test_lib_perf
 
 clean:
 	rm -f -R $(SHAREDDIR) $(STATICDIR) $(TARGET_SO) $(TARGET_A)

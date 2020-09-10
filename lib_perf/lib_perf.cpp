@@ -312,5 +312,9 @@ int main()
               << ", BASE BIT = " << BASE_BIT
               << ", MUL BIT = " << MUL_BIT << std::endl;
 
+    // gmp allow this complie，but the result is incorrect
+    // mpz_class b(1000000000);
+    // std::cout << b << " ==>> " << b * 0.01 << std::endl;
+
     return 0;
 }
