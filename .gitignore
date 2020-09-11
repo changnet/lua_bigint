@@ -32,3 +32,5 @@
 *.app
 
 test_lib_perf
+BOOST_FILES
+boost
