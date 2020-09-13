@@ -14,6 +14,12 @@ LIST_F=$DST/BOOST_FILES
 
 # run make and catch error message to find out what boost header is missing
 # this is ugly and slow but it works
+
+# if terminal's language is not english, run
+# unset LANGUAGE
+# LC_MESSAGES=C
+# to set it as english,this should only affect current terminal
+
 function find_boost_header()
 {
     msg=$(make 2>&1)
