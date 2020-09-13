@@ -8,23 +8,19 @@ static inline class lbigint *luaL_checklbigint(lua_State *L, int index)
     class lbigint** lbi = (class lbigint**)luaL_checkudata(L, 1, LIB_NAME);
     if (!lbi || !(*lbi))
     {
-        return luaL_error(L, "encode argument #%d expect %s", index, LIB_NAME);
+        luaL_error(L, "encode argument #%d expect %s", index, LIB_NAME);
+        return nullptr;
     }
 
-    return *lib;
+    return *lbi;
 }
 
 /**
  * 从 string、integer、bigint 设置当前的值，i:set(0)即置0
  */
-static int set( lua_State *L )
+static int set(lua_State *L)
 {
-    class lbigint** lbi =
-        (class lbigint**)luaL_checkudata(L, 1, LIB_NAME);
-    if (!lbi || !(*lbi))
-    {
-        return luaL_error(L, "encode argument #1 expect %s", LIB_NAME);
-    }
+    class lbigint *lbi = luaL_checklbigint(L, 1);
 
     return 0;
 }
@@ -55,10 +51,10 @@ static int __call(lua_State* L)
 /* 元方法,__tostring */
 static int __tostring(lua_State* L)
 {
-    class lbigint** ptr = (class lbigint**)luaL_checkudata(L, 1,LIB_NAME);
-    if(ptr)
+    class lbigint *lbi = luaL_checklbigint(L, 1);
+    if(lbi)
     {
-        lua_pushfstring(L, "%s: %p", LIB_NAME, *ptr);
+        lua_pushstring(L, lbi->str().c_str());
         return 1;
     }
     return 0;
@@ -68,8 +64,11 @@ static int __tostring(lua_State* L)
 static int __gc(lua_State* L)
 {
     class lbigint** ptr = (class lbigint**)luaL_checkudata(L, 1,LIB_NAME);
-    if (*ptr != NULL) delete *ptr;
-    *ptr = NULL;
+    if (*ptr != nullptr)
+    {
+        delete *ptr;
+    }
+    *ptr = nullptr;
 
     return 0;
 }

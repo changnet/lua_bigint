@@ -54,6 +54,9 @@ $(TARGET_A): $(STATICOBJS)
 	$(AR) $@ $(STATICOBJS)
 	$(RANLIB) $@
 
+test: $(TARGET_SO)
+	lua test.lua
+
 # export BOOST_INC=../boost_1_74_0
 
 # install gmp: https://gmplib.org/
