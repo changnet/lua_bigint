@@ -4,7 +4,7 @@
 #include <lua.hpp>
 extern "C"
 {
-extern int luaopen_lua_bigint(lua_State *L);
+    extern int luaopen_lua_bigint(lua_State *L);
 }
 
 // TODO 外部调用看能不能避免引用boost，头文件实在太多，不好管理
