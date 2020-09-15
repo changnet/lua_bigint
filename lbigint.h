@@ -22,6 +22,14 @@ public:
     {
         _const = false;
     }
+    explicit lbigint(const int64_t o) : bigint_t(o)
+    {
+        _const = false;
+    }
+    explicit lbigint(const char *o) : bigint_t(o)
+    {
+        _const = false;
+    }
     explicit lbigint(const lbigint &o) : bigint_t(o)
     {
         _const = o._const;

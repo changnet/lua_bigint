@@ -15,9 +15,39 @@ static inline lbigint *luaL_checklbigint(lua_State *L, int index)
 }
 
 /**
- * 从 string、integer、bigint 设置当前的值，i:set(0)即置0
+ * 把一个lbigint对象push到栈上
+ * 注意不要把同一个对象多次push到lua，因为userdata执行gc的时候会被销毁导致多次delete
+ * 把一个已经在lua中的对象push到栈上，使用lua_pushvalue
  */
-static int set(lua_State *L)
+static inline void lua_pushlbigint(lua_State *L, const lbigint *i)
+{
+    const lbigint **ptr = (const lbigint **)lua_newuserdata(L, sizeof(lbigint *));
+
+    *ptr = i;
+
+    // mush call luaopen_lua_bigint before
+    int type = luaL_getmetatable(L, LIB_NAME);
+    assert(LUA_TTABLE == type);
+
+    lua_setmetatable(L, -2);
+}
+
+/* like lua_topointer */
+static int topointer(lua_State *L)
+{
+    lbigint *lbi = luaL_checklbigint(L, 1);
+    if (lbi)
+    {
+        lua_pushinteger(L, (lua_Integer)lbi);
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * 从 string、integer、bigint 设置当前的值，i:assign(0)即置0
+ */
+static int assign(lua_State *L)
 {
     lbigint *lbi = luaL_checklbigint(L, 1);
 
@@ -40,7 +70,13 @@ static int set(lua_State *L)
     else if (LUA_TUSERDATA == type)
     {
         lbigint *lbi_o = luaL_checklbigint(L, 2);
+        // std::string old = lbi->str();
+        // std::string o1 = lbi_o->str();
         *lbi = *lbi_o;
+        // std::string n = lbi->str();
+        // std::string o = lbi_o->str();
+
+        // int i = 99;
     }
     else
     {
@@ -95,7 +131,33 @@ static int add(lua_State *L)
 static int __call(lua_State *L)
 {
     /* lua调用__call,第一个参数是该元表所属的table.取构造函数参数要注意 */
-    lbigint *obj = new lbigint();
+    lbigint *obj = nullptr;
+
+    int type = lua_type(L, 2);
+    if (LUA_TNUMBER == type)
+    {
+        obj = new lbigint(lua_tointeger(L, 2));
+    }
+    else if (LUA_TSTRING == type)
+    {
+        try
+        {
+            obj = new lbigint(lua_tostring(L, 2));
+        }
+        catch (const std::exception &e)
+        {
+            luaL_error(L, e.what());
+        }
+    }
+    else if (LUA_TUSERDATA == type)
+    {
+        lbigint *lbi_o = luaL_checklbigint(L, 2);
+        obj = new lbigint(*lbi_o);
+    }
+    else
+    {
+        obj = new lbigint();
+    }
 
     lua_settop(L, 1); /* 清除所有构造函数参数,只保留元表 */
 
@@ -145,8 +207,11 @@ int luaopen_lua_bigint(lua_State *L)
         return 0;
     }
 
-    lua_pushcfunction(L, set);
-    lua_setfield(L, -2, "set");
+    lua_pushcfunction(L, topointer);
+    lua_setfield(L, -2, "topointer");
+
+    lua_pushcfunction(L, assign);
+    lua_setfield(L, -2, "assign");
 
     lua_pushcfunction(L, add);
     lua_setfield(L, -2, "__add");

@@ -1,35 +1,76 @@
 local lbigint = require "lua_bigint"
 
-local function test_set(val, expect, msg)
-    local i = lbigint()
+local function EQ(got, expect)
+    if expect == got then return end
 
+    print("got:", got)
+    print("expect：", expect)
+
+    assert(false)
+end
+
+local function test_construct(val, expect, msg)
     if not msg then
-        i:set(val)
-        assert(tostring(i) == (expect or tostring(val)))
+        local i = lbigint(val)
+        EQ(tostring(i), expect or tostring(val))
         return
     end
 
-    -- test error set
-    xpcall(i.set, function(emsg)
-        asert(emsg == msg)
+    -- test error
+    xpcall(function() lbigint(val) end, function(emsg)
+        asert(emsg == msg, emsg)
     end, i, val)
 end
 
-local a = lbigint()
-assert(tostring(a) == "0")
+local function test_assign(val, expect, msg)
+    local i = lbigint()
 
-test_set(10000001)
-test_set("10000000000000000000000000000000000000000000000000000000000000000002")
-test_set("0xFF", "255")
-test_set("-10000001")
+    if not msg then
+        i:assign(val)
+        EQ(tostring(i), expect or tostring(val))
+        return
+    end
+
+    -- test error assign
+    xpcall(i.assign, function(emsg)
+        asert(emsg == msg, emsg)
+    end, i, val)
+end
 
 local b = lbigint("100000000000009")
-test_set(b)
+print(b)
+local i = lbigint(10000)
+print(i)
+i:assign(b)
+print(i)
+
+------- /////////////////////////// construct ////////////////////////////////
+
+test_construct(nil, "0")
+test_construct(0)
+test_construct(-0, "0")
+
+test_construct(10000001)
+test_construct("10000000000000000000000000000000000000000000000000000000000000000002")
+test_construct("0xFF", "255")
+test_construct("-10000001")
+
+test_assign("ll", nil, "Unexpected character encountered in input.")
+
+------- /////////////////////////// assign      ////////////////////////////////
+
+test_assign(10000001)
+test_assign("10000000000000000000000000000000000000000000000000000000000000000002")
+test_assign("0xFF", "255")
+test_assign("-10000001")
+
+local b = lbigint("100000000000009")
+test_assign(b)
 
 -- error test
-test_set("ll", nil, "Unexpected character encountered in input.")
-test_set(false, nil, "can not convert boolean to big integer")
+test_assign("ll", nil, "Unexpected character encountered in input.")
+test_assign(false, nil, "can not convert boolean to big integer")
 
 local b = lbigint()
 local c = b + 100000
-print(b, c, b == c)
+print(b, c, b == c, b:topointer(), c:topointer())
