@@ -22,7 +22,8 @@ STATICOBJS = $(addprefix $(STATICDIR)/,$(OBJS))
 
 DEPS := $(SHAREDOBJS + STATICOBJS:.o=.d)
 
-#The dash at the start of '-include' tells Make to continue when the .d file doesn't exist (e.g. on first compilation)
+# The dash at the start of '-include' tells Make to continue when the .d file
+# doesn't exist (e.g. on first compilation)
 -include $(DEPS)
 
 .PHONY: all clean test staticlib sharedlib

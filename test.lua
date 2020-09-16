@@ -37,13 +37,6 @@ local function test_assign(val, expect, msg)
     end, i, val)
 end
 
-local b = lbigint("100000000000009")
-print(b)
-local i = lbigint(10000)
-print(i)
-i:assign(b)
-print(i)
-
 ------- /////////////////////////// construct ////////////////////////////////
 
 test_construct(nil, "0")
@@ -51,7 +44,7 @@ test_construct(0)
 test_construct(-0, "0")
 
 test_construct(10000001)
-test_construct("10000000000000000000000000000000000000000000000000000000000000000002")
+test_construct("10000000000000000000000000000000000000000000000000000000000002")
 test_construct("0xFF", "255")
 test_construct("-10000001")
 
@@ -60,7 +53,7 @@ test_assign("ll", nil, "Unexpected character encountered in input.")
 ------- /////////////////////////// assign      ////////////////////////////////
 
 test_assign(10000001)
-test_assign("10000000000000000000000000000000000000000000000000000000000000000002")
+test_assign("10000000000000000000000000000000000000000000000000000000000000002")
 test_assign("0xFF", "255")
 test_assign("-10000001")
 
@@ -71,6 +64,9 @@ test_assign(b)
 test_assign("ll", nil, "Unexpected character encountered in input.")
 test_assign(false, nil, "can not convert boolean to big integer")
 
+local c = lbigint(100000099)
+c:set_const(true)
+
 local b = lbigint()
 local c = b + 100000
-print(b, c, b == c, b:topointer(), c:topointer())
+print(b, c, b == c, b:to_pointer(), c:to_pointer())

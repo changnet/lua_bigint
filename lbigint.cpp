@@ -4,7 +4,7 @@
 
 static inline lbigint *luaL_checklbigint(lua_State *L, int index)
 {
-    lbigint **lbi = (lbigint **)luaL_checkudata(L, 1, LIB_NAME);
+    lbigint **lbi = (lbigint **)luaL_checkudata(L, index, LIB_NAME);
     if (!lbi || !(*lbi))
     {
         luaL_error(L, "encode argument #%d expect %s", index, LIB_NAME);
@@ -33,14 +33,21 @@ static inline void lua_pushlbigint(lua_State *L, const lbigint *i)
 }
 
 /* like lua_topointer */
-static int topointer(lua_State *L)
+static int to_pointer(lua_State *L)
 {
     lbigint *lbi = luaL_checklbigint(L, 1);
-    if (lbi)
-    {
-        lua_pushinteger(L, (lua_Integer)lbi);
-        return 1;
-    }
+
+    lua_pushinteger(L, (lua_Integer)lbi);
+    return 1;
+}
+
+/* like lua_topointer */
+static int set_const(lua_State *L)
+{
+    lbigint *lbi = luaL_checklbigint(L, 1);
+    bool c = lua_toboolean(L, 2);
+
+    lbi->set_const(c);
     return 0;
 }
 
@@ -70,13 +77,8 @@ static int assign(lua_State *L)
     else if (LUA_TUSERDATA == type)
     {
         lbigint *lbi_o = luaL_checklbigint(L, 2);
-        // std::string old = lbi->str();
-        // std::string o1 = lbi_o->str();
-        *lbi = *lbi_o;
-        // std::string n = lbi->str();
-        // std::string o = lbi_o->str();
 
-        // int i = 99;
+        *lbi = *lbi_o;
     }
     else
     {
@@ -207,8 +209,11 @@ int luaopen_lua_bigint(lua_State *L)
         return 0;
     }
 
-    lua_pushcfunction(L, topointer);
-    lua_setfield(L, -2, "topointer");
+    lua_pushcfunction(L, to_pointer);
+    lua_setfield(L, -2, "to_pointer");
+
+    lua_pushcfunction(L, set_const);
+    lua_setfield(L, -2, "set_const");
 
     lua_pushcfunction(L, assign);
     lua_setfield(L, -2, "assign");

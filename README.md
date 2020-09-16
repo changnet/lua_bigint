@@ -19,10 +19,40 @@ tostring(i0) -- 10000000
 
 -- get pointer address, typically this function is used only
 -- for hashing and debug information
-i0:topointer() -- 93943009449888
+i0:to_pointer() -- 93943009449888
+
+i0:set_const(true) -- set as const(immutable)
 
 -- arithmetic + - * /
 
+```
+
+## Mutable
+Usually variables in arithmetic are immutable, e.g.
+```lua
+local a = 100
+local b = 50
+
+local c = a + b -- this is it, a still 100 and b still 50
+```
+this is very effecitive. But when it comes to big integer, can be very slow, e.g.
+```lua
+local a = lbigint("100000000000000...") -- there is 10000-0
+a = a + 1
+```
+If `a` is immutable, a temporary variable will be cloned from `a`, and the cloned
+process is quit slow. in this case the `a` is expected to be mutable, the cloned
+is total waste of time.
+
+As default, in any big integer arithmetic, variables are all mutable, unless they
+are immutable(use `set_const(true)`) or create a temporary variable manually. e.g.
+```lua
+local a = lbigint("1000000000")
+
+local d = lbigint(a) + 10000000 -- create a temporary variable manually
+
+a:set_const(true)
+local c = a + 1000000 -- a still 1000000000
 ```
 
 ## TODO
