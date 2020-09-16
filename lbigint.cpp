@@ -103,11 +103,52 @@ static int equal(lua_State *L)
     // in lua, a integer or string compare to a userdata, the userdata's __eq
     // meta method never get called, it just return false
     //  100 == lbigint(100) is always false
+    // however, we can call equal manually
     const lbigint *lbi = luaL_checklbigint(L, 1);
-    const lbigint *lbi_o = luaL_checklbigint(L, 2);
+
+    bool e = false;
+    int type = lua_type(L, 2);
+    if (LUA_TNUMBER == type)
+    {
+        e = (((bigint_t)*lbi) == lua_tointeger(L, 2));
+    }
+    else if (LUA_TSTRING == type)
+    {
+        try
+        {
+            const bigint_t bi_o(lua_tostring(L, 2));
+            e = (((bigint_t)*lbi) == bi_o);
+        }
+        catch (const std::exception &e)
+        {
+            luaL_error(L, e.what());
+        }
+    }
+    else if (LUA_TUSERDATA == type)
+    {
+        const lbigint *lbi_o = luaL_checklbigint(L, 2);
+
+        e = (((bigint_t)*lbi) == ((bigint_t)*lbi_o));
+    }
+    else
+    {
+        luaL_error(L,
+                   "can not convert %s to big integer", lua_typename(L, type));
+    }
 
     // _const is not consider, just compare value
-    lua_pushboolean(L, (bigint_t(*lbi)) == (bigint_t(*lbi_o)));
+    lua_pushboolean(L, e);
+    return 1;
+}
+
+// test sign
+static int sign(lua_State *L)
+{
+    const lbigint *lbi = luaL_checklbigint(L, 1);
+
+    // misc.hpp
+    // eval_is_zero(val) ? 0 : val.sign() ? -1 : 1;
+    lua_pushinteger(L, lbi->sign());
     return 1;
 }
 
@@ -270,6 +311,12 @@ int luaopen_lua_bigint(lua_State *L)
 
     lua_pushcfunction(L, assign);
     lua_setfield(L, -2, "assign");
+
+    lua_pushcfunction(L, sign);
+    lua_setfield(L, -2, "sign");
+
+    lua_pushcfunction(L, equal);
+    lua_setfield(L, -2, "equal");
 
     lua_pushcfunction(L, equal);
     lua_setfield(L, -2, "__eq");

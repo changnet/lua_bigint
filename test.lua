@@ -75,14 +75,28 @@ test_assign("ll", nil, "Unexpected character encountered in input.")
 test_assign(false, nil, "can not convert boolean to big integer")
 
 ------- /////////////////////////// equal //////////////////////////////////////
--- assert(lbigint() == lbigint())
--- assert(lbigint("10000000000000000000005") == lbigint("10000000000000000000005"))
+EQ(lbigint(), lbigint())
+EQ(lbigint("10000000000000000000005"), lbigint("10000000000000000000005"))
+
+EQ(lbigint():equal(0), true)
+EQ(lbigint():equal(1000), false)
+EQ(lbigint(1):equal(1), true)
+EQ(lbigint(0xFFFFFFFFFFFFFFFF):equal(0xFFFFFFFFFFFFFFFF), true)
+EQ(lbigint("10000000000000000000005"):equal("10000000000000000000005"), true)
+EQ(lbigint("10000000000000000005"):equal(lbigint("10000000000000000005")), true)
 
 -- test equal with diffrent type, meta method __eq never get called, the result
 -- is always false
-assert(lbigint(1) ~= 1)
-assert(lbigint(1) ~= "1")
-assert(lbigint(1) ~= {})
+NEQ(lbigint(1), 1)
+NEQ(lbigint(1), "1")
+NEQ(lbigint(1), {})
+
+------- /////////////////////////// sign ///////////////////////////////////////
+EQ(lbigint():sign(), 0)
+EQ(lbigint(0):sign(), 0)
+EQ(lbigint(-1):sign(), -1)
+EQ(lbigint("-0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"):sign(), -1)
+EQ(lbigint("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"):sign(), 1)
 
 ------- /////////////////////////// add ////////////////////////////////////////
 local function test_add(v1, v2, expect, p)

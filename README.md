@@ -25,8 +25,16 @@ i0:set_const(true) -- set as const(immutable)
 
 assert(lbigint(100) == lbigint(100)) -- test equal
 -- test equal with diffrent type, meta method __eq never get called,
--- the result is always false
+-- the result is always false, however, equal can be called manually
 assert(lbigint(100) ~= 100)
+assert(lbigint(100):equal(100))
+assert(lbigint(100):equal("100"))
+assert(lbigint(100):equal(lbigint(100)))
+
+-- test sign
+assert(lbigint(0) == 0)
+assert(lbigint(1) == 1) -- >0 return 1
+assert(lbigint(-1) == -1) -- <0 return -1
 
 -- arithmetic + - * /
 
