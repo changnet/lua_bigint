@@ -4,7 +4,7 @@ CXX = g++
 
 TARGET_SO =         lua_bigint.so
 TARGET_A  =         liblua_bigint.a
-CFLAGS =            -std=c++11 -g3 -Wall -pedantic -fno-inline -I.
+CFLAGS =            -std=c++11 -g3 -O0 -Wall -pedantic -fno-inline -I.
 # CFLAGS =            -std=c++11 -O2 -Wall -pedantic #-DNDEBUG
 
 SHAREDDIR = .sharedlib

@@ -35,9 +35,9 @@ local b = 50
 
 local c = a + b -- this is it, a still 100 and b still 50
 ```
-this is very effecitive. But when it comes to big integer, can be very slow, e.g.
+this is very efficient. But when it comes to big integer, can be very slow, e.g.
 ```lua
-local a = lbigint("100000000000000...") -- there is 10000-0
+local a = lbigint("100000000000000...") -- a 10000-0 long string
 a = a + 1
 ```
 If `a` is immutable, a temporary variable will be cloned from `a`, and the cloned

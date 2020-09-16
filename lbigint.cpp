@@ -58,6 +58,11 @@ static int assign(lua_State *L)
 {
     lbigint *lbi = luaL_checklbigint(L, 1);
 
+    if (lbi->is_const())
+    {
+        return luaL_error(L, "attemp to modify a const big integer");
+    }
+
     int type = lua_type(L, 2);
     if (LUA_TNUMBER == type)
     {
@@ -78,7 +83,10 @@ static int assign(lua_State *L)
     {
         lbigint *lbi_o = luaL_checklbigint(L, 2);
 
-        *lbi = *lbi_o;
+        if (lbi != lbi_o) // self assign check
+        {
+            *lbi = *lbi_o;
+        }
     }
     else
     {
@@ -94,36 +102,67 @@ static int assign(lua_State *L)
  */
 static int add(lua_State *L)
 {
-    lbigint *lbi = luaL_checklbigint(L, 1);
+    // 大整数有可能在左边，也有可能在右边
+    int index_a = 1;
+    int index_b = 2;
+    if (LUA_TUSERDATA != lua_type(L, 1))
+    {
+        index_a = 2;
+        index_b = 1;
+    }
 
-    int type = lua_type(L, 2);
+    lbigint *lbi = luaL_checklbigint(L, index_a);
+    // const variable, create a temporary variables
+    if (lbi->is_const())
+    {
+        index_a = -1;
+        lbi = new lbigint(*lbi);
+    }
+
+    int type = lua_type(L, index_b);
     if (LUA_TNUMBER == type)
     {
-        *lbi += lua_tointeger(L, 2);
+        *lbi += lua_tointeger(L, index_b);
     }
     else if (LUA_TSTRING == type)
     {
         try
         {
-            *lbi = lua_tostring(L, 2);
+            *lbi += bigint_t(lua_tostring(L, index_b));
         }
         catch (const std::exception &e)
         {
+            if (-1 == index_a)
+            {
+                delete lbi;
+            }
             luaL_error(L, e.what());
         }
     }
     else if (LUA_TUSERDATA == type)
     {
-        lbigint *lbi_o = luaL_checklbigint(L, 2);
-        *lbi = *lbi_o;
+        bigint_t *lbi_o = luaL_checklbigint(L, index_b);
+
+        *lbi += *lbi_o;
     }
     else
     {
+        if (-1 == index_a)
+        {
+            delete lbi;
+        }
         luaL_error(L,
                    "can not convert %s to big integer", lua_typename(L, type));
     }
 
-    lua_remove(L, 2); // left the user data at stack top to return it
+    if (-1 == index_a)
+    {
+        lua_pushlbigint(L, lbi);
+    }
+    else
+    {
+        lua_settop(L, index_a); // left the user data at stack top to return it
+    }
     return 1;
 }
 
