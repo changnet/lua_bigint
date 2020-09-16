@@ -74,6 +74,16 @@ EQ(tostring(a0), "100000000000000000000000009")
 test_assign("ll", nil, "Unexpected character encountered in input.")
 test_assign(false, nil, "can not convert boolean to big integer")
 
+------- /////////////////////////// equal //////////////////////////////////////
+-- assert(lbigint() == lbigint())
+-- assert(lbigint("10000000000000000000005") == lbigint("10000000000000000000005"))
+
+-- test equal with diffrent type, meta method __eq never get called, the result
+-- is always false
+assert(lbigint(1) ~= 1)
+assert(lbigint(1) ~= "1")
+assert(lbigint(1) ~= {})
+
 ------- /////////////////////////// add ////////////////////////////////////////
 local function test_add(v1, v2, expect, p)
     local c = v1 + v2

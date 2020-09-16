@@ -23,6 +23,11 @@ i0:to_pointer() -- 93943009449888
 
 i0:set_const(true) -- set as const(immutable)
 
+assert(lbigint(100) == lbigint(100)) -- test equal
+-- test equal with diffrent type, meta method __eq never get called,
+-- the result is always false
+assert(lbigint(100) ~= 100)
+
 -- arithmetic + - * /
 
 ```

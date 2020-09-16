@@ -81,7 +81,7 @@ static int assign(lua_State *L)
     }
     else if (LUA_TUSERDATA == type)
     {
-        lbigint *lbi_o = luaL_checklbigint(L, 2);
+        const lbigint *lbi_o = luaL_checklbigint(L, 2);
 
         if (lbi != lbi_o) // self assign check
         {
@@ -95,6 +95,20 @@ static int assign(lua_State *L)
     }
 
     return 0;
+}
+
+// check two big int equip
+static int equal(lua_State *L)
+{
+    // in lua, a integer or string compare to a userdata, the userdata's __eq
+    // meta method never get called, it just return false
+    //  100 == lbigint(100) is always false
+    const lbigint *lbi = luaL_checklbigint(L, 1);
+    const lbigint *lbi_o = luaL_checklbigint(L, 2);
+
+    // _const is not consider, just compare value
+    lua_pushboolean(L, (bigint_t(*lbi)) == (bigint_t(*lbi_o)));
+    return 1;
 }
 
 /**
@@ -256,6 +270,9 @@ int luaopen_lua_bigint(lua_State *L)
 
     lua_pushcfunction(L, assign);
     lua_setfield(L, -2, "assign");
+
+    lua_pushcfunction(L, equal);
+    lua_setfield(L, -2, "__eq");
 
     lua_pushcfunction(L, add);
     lua_setfield(L, -2, "__add");
