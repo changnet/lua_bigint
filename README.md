@@ -32,9 +32,9 @@ assert(lbigint(100):equal("100"))
 assert(lbigint(100):equal(lbigint(100)))
 
 -- test sign
-assert(lbigint(0) == 0)
-assert(lbigint(1) == 1) -- >0 return 1
-assert(lbigint(-1) == -1) -- <0 return -1
+assert(lbigint(0):sign() == 0)
+assert(lbigint(1):sign() == 1) -- >0 return 1
+assert(lbigint(-1):sign() == -1) -- <0 return -1
 
 -- compare
 assert(lbigint() > -1)
@@ -42,7 +42,10 @@ assert(lbigint(100000000001) > "100000000000")
 assert(lbigint(100000000001) > lbigint(100000000000))
 
 -- unary minus
-assert(-lbigint(1) == -1)
+assert(-lbigint(1) == lbigint(-1))
+
+-- pow
+assert(lbigint(2)^10 == lbigint(2^10))
 
 -- arithmetic + - * /
 assert(lbigint(1) + 1)

@@ -229,6 +229,29 @@ static int sign(lua_State *L)
     return 1;
 }
 
+static int pow(lua_State *L)
+{
+    bigint_t *lbi = luaL_checklbigint(L, 1);
+    const int64_t v = luaL_checkinteger(L, 2);
+
+    // wrap all in try catch to catch all error(e.g. division by zero)
+    try
+    {
+        // can not do pow(a, b) which b > INT64_MAX
+        // https://stackoverflow.com/questions/43484555/boostmultiprecisionpow-with-two-cpp-int-values
+        const bigint_t &&r = boost::multiprecision::pow(*lbi, v);
+        *lbi = std::move(r);
+    }
+    catch (const std::exception &e)
+    {
+
+        luaL_error(L, e.what());
+    }
+
+    lua_settop(L, 1);
+    return 1;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // arithmetic + - * /
 ////////////////////////////////////////////////////////////////////////////////
@@ -613,6 +636,9 @@ int luaopen_lua_bigint(lua_State *L)
 
     lua_pushcfunction(L, unm);
     lua_setfield(L, -2, "__unm");
+
+    lua_pushcfunction(L, pow);
+    lua_setfield(L, -2, "__pow");
 
     lua_pushcfunction(L, add);
     lua_setfield(L, -2, "__add");

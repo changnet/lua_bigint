@@ -122,6 +122,10 @@ assert(lbigint(100000000001) > "100000000000")
 assert("100000000000" < lbigint(100000000001))
 assert(lbigint(100000000001) > lbigint(100000000000))
 
+------- ///////////////////////// pow //////////////////////////////////////////
+EQ(tostring(lbigint()^2), "0")
+EQ(tostring(lbigint(100)^10), string.format("%.0f", math.floor(100^10)))
+
 ------- //////////////////// arithmetic + - * //////////////////////////////////
 local function test_arithmetic(sym, v1, v2, expect, p)
     local c
