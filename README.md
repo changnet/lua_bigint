@@ -45,6 +45,10 @@ assert(lbigint(100000000001) > lbigint(100000000000))
 assert(-lbigint(1) == -1)
 
 -- arithmetic + - * /
+assert(lbigint(1) + 1)
+assert(lbigint(1) - "100")
+assert(lbigint(1) * lbigint(100))
+local a = 1 + lbigint(2) - "3" * lbigint(4) / 100
 
 ```
 

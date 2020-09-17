@@ -21,7 +21,8 @@ static inline lbigint *luaL_checklbigint(lua_State *L, int index)
  */
 static inline void lua_pushlbigint(lua_State *L, const lbigint *i)
 {
-    const lbigint **ptr = (const lbigint **)lua_newuserdata(L, sizeof(lbigint *));
+    const lbigint **ptr =
+        (const lbigint **)lua_newuserdata(L, sizeof(lbigint *));
 
     *ptr = i;
 
@@ -64,34 +65,36 @@ static int assign(lua_State *L)
     }
 
     int type = lua_type(L, 2);
-    if (LUA_TNUMBER == type)
+    try
     {
-        *lbi = lua_tointeger(L, 2);
-    }
-    else if (LUA_TSTRING == type)
-    {
-        try
+        if (LUA_TNUMBER == type)
         {
+            *lbi = lua_tointeger(L, 2);
+        }
+        else if (LUA_TSTRING == type)
+        {
+
             *lbi = lua_tostring(L, 2);
         }
-        catch (const std::exception &e)
+        else if (LUA_TUSERDATA == type)
         {
-            luaL_error(L, e.what());
-        }
-    }
-    else if (LUA_TUSERDATA == type)
-    {
-        const lbigint *lbi_o = luaL_checklbigint(L, 2);
+            const lbigint *lbi_o = luaL_checklbigint(L, 2);
 
-        if (lbi != lbi_o) // self assign check
+            if (lbi != lbi_o) // self assign check
+            {
+                *lbi = *lbi_o;
+            }
+        }
+        else
         {
-            *lbi = *lbi_o;
+            luaL_error(L,
+                       "can not convert %s to big integer",
+                       lua_typename(L, type));
         }
     }
-    else
+    catch (const std::exception &e)
     {
-        luaL_error(L,
-                   "can not convert %s to big integer", lua_typename(L, type));
+        luaL_error(L, e.what());
     }
 
     return 0;
@@ -108,32 +111,33 @@ static int equal(lua_State *L)
 
     bool e = false;
     int type = lua_type(L, 2);
-    if (LUA_TNUMBER == type)
+    try
     {
-        e = ((*lbi) == lua_tointeger(L, 2));
-    }
-    else if (LUA_TSTRING == type)
-    {
-        try
+        if (LUA_TNUMBER == type)
+        {
+            e = ((*lbi) == lua_tointeger(L, 2));
+        }
+        else if (LUA_TSTRING == type)
         {
             const bigint_t bi_o(lua_tostring(L, 2));
             e = ((*lbi) == bi_o);
         }
-        catch (const std::exception &e)
+        else if (LUA_TUSERDATA == type)
         {
-            luaL_error(L, e.what());
+            const bigint_t *lbi_o = luaL_checklbigint(L, 2);
+
+            e = ((*lbi) == (*lbi_o));
+        }
+        else
+        {
+            luaL_error(L,
+                       "can not convert %s to big integer",
+                       lua_typename(L, type));
         }
     }
-    else if (LUA_TUSERDATA == type)
+    catch (const std::exception &e)
     {
-        const bigint_t *lbi_o = luaL_checklbigint(L, 2);
-
-        e = ((*lbi) == (*lbi_o));
-    }
-    else
-    {
-        luaL_error(L,
-                   "can not convert %s to big integer", lua_typename(L, type));
+        luaL_error(L, e.what());
     }
 
     // _const is not consider, just compare value
@@ -158,32 +162,35 @@ static int less(lua_State *L)
 
     bool e = false;
     int type = lua_type(L, index_b);
-    if (LUA_TNUMBER == type)
+
+    try
     {
-        e = COMP(*lbi, lua_tointeger(L, index_b));
-    }
-    else if (LUA_TSTRING == type)
-    {
-        try
+        if (LUA_TNUMBER == type)
         {
+            e = COMP(*lbi, lua_tointeger(L, index_b));
+        }
+        else if (LUA_TSTRING == type)
+        {
+
             const bigint_t bi_o(lua_tostring(L, index_b));
             e = COMP(*lbi, bi_o);
         }
-        catch (const std::exception &e)
+        else if (LUA_TUSERDATA == type)
         {
-            luaL_error(L, e.what());
+            const bigint_t *lbi_o = luaL_checklbigint(L, index_b);
+
+            e = COMP(*lbi, *lbi_o);
+        }
+        else
+        {
+            luaL_error(L,
+                       "can not convert %s to big integer",
+                       lua_typename(L, type));
         }
     }
-    else if (LUA_TUSERDATA == type)
+    catch (const std::exception &e)
     {
-        const bigint_t *lbi_o = luaL_checklbigint(L, index_b);
-
-        e = COMP(*lbi, *lbi_o);
-    }
-    else
-    {
-        luaL_error(L,
-                   "can not convert %s to big integer", lua_typename(L, type));
+        luaL_error(L, e.what());
     }
 
     // _const is not consider, just compare value
@@ -222,9 +229,9 @@ static int sign(lua_State *L)
     return 1;
 }
 
-/**
- * 加法，支持 string、integer、bigint
- */
+////////////////////////////////////////////////////////////////////////////////
+// arithmetic + - * /
+////////////////////////////////////////////////////////////////////////////////
 static int add(lua_State *L)
 {
     // 大整数有可能在左边，也有可能在右边
@@ -245,39 +252,249 @@ static int add(lua_State *L)
     }
 
     int type = lua_type(L, index_b);
-    if (LUA_TNUMBER == type)
+    // wrap all in try catch to catch all error(e.g. division by zero)
+    try
     {
-        *lbi += lua_tointeger(L, index_b);
-    }
-    else if (LUA_TSTRING == type)
-    {
-        try
+        if (LUA_TNUMBER == type)
         {
+            *lbi += lua_tointeger(L, index_b);
+        }
+        else if (LUA_TSTRING == type)
+        {
+
             *lbi += bigint_t(lua_tostring(L, index_b));
         }
-        catch (const std::exception &e)
+        else if (LUA_TUSERDATA == type)
+        {
+            const bigint_t *lbi_o = luaL_checklbigint(L, index_b);
+
+            *lbi += *lbi_o;
+        }
+        else
         {
             if (-1 == index_a)
             {
                 delete lbi;
             }
-            luaL_error(L, e.what());
+            luaL_error(L,
+                       "can not convert %s to big integer",
+                       lua_typename(L, type));
         }
     }
-    else if (LUA_TUSERDATA == type)
-    {
-        const bigint_t *lbi_o = luaL_checklbigint(L, index_b);
-
-        *lbi += *lbi_o;
-    }
-    else
+    catch (const std::exception &e)
     {
         if (-1 == index_a)
         {
             delete lbi;
         }
-        luaL_error(L,
-                   "can not convert %s to big integer", lua_typename(L, type));
+        luaL_error(L, e.what());
+    }
+
+    if (-1 == index_a)
+    {
+        lua_pushlbigint(L, lbi);
+    }
+    else
+    {
+        lua_settop(L, index_a); // left the user data at stack top to return it
+    }
+    return 1;
+}
+
+static int sub(lua_State *L)
+{
+    // 大整数有可能在左边，也有可能在右边
+    int index_a = 1;
+    int index_b = 2;
+    if (LUA_TUSERDATA != lua_type(L, 1))
+    {
+        index_a = 2;
+        index_b = 1;
+    }
+
+    lbigint *lbi = luaL_checklbigint(L, index_a);
+    // const variable, create a temporary variables
+    if (lbi->is_const())
+    {
+        index_a = -1;
+        lbi = new lbigint(*lbi);
+    }
+
+    int type = lua_type(L, index_b);
+    // wrap all in try catch to catch all error(e.g. division by zero)
+    try
+    {
+        if (LUA_TNUMBER == type)
+        {
+            *lbi -= lua_tointeger(L, index_b);
+        }
+        else if (LUA_TSTRING == type)
+        {
+
+            *lbi -= bigint_t(lua_tostring(L, index_b));
+        }
+        else if (LUA_TUSERDATA == type)
+        {
+            const bigint_t *lbi_o = luaL_checklbigint(L, index_b);
+
+            *lbi -= *lbi_o;
+        }
+        else
+        {
+            if (-1 == index_a)
+            {
+                delete lbi;
+            }
+            luaL_error(L,
+                       "can not convert %s to big integer",
+                       lua_typename(L, type));
+        }
+    }
+    catch (const std::exception &e)
+    {
+        if (-1 == index_a)
+        {
+            delete lbi;
+        }
+        luaL_error(L, e.what());
+    }
+
+    if (-1 == index_a)
+    {
+        lua_pushlbigint(L, lbi);
+    }
+    else
+    {
+        lua_settop(L, index_a); // left the user data at stack top to return it
+    }
+    return 1;
+}
+
+static int mul(lua_State *L)
+{
+    // 大整数有可能在左边，也有可能在右边
+    int index_a = 1;
+    int index_b = 2;
+    if (LUA_TUSERDATA != lua_type(L, 1))
+    {
+        index_a = 2;
+        index_b = 1;
+    }
+
+    lbigint *lbi = luaL_checklbigint(L, index_a);
+    // const variable, create a temporary variables
+    if (lbi->is_const())
+    {
+        index_a = -1;
+        lbi = new lbigint(*lbi);
+    }
+
+    int type = lua_type(L, index_b);
+    // wrap all in try catch to catch all error(e.g. division by zero)
+    try
+    {
+        if (LUA_TNUMBER == type)
+        {
+            *lbi *= lua_tointeger(L, index_b);
+        }
+        else if (LUA_TSTRING == type)
+        {
+
+            *lbi *= bigint_t(lua_tostring(L, index_b));
+        }
+        else if (LUA_TUSERDATA == type)
+        {
+            const bigint_t *lbi_o = luaL_checklbigint(L, index_b);
+
+            *lbi *= *lbi_o;
+        }
+        else
+        {
+            if (-1 == index_a)
+            {
+                delete lbi;
+            }
+            luaL_error(L,
+                       "can not convert %s to big integer",
+                       lua_typename(L, type));
+        }
+    }
+    catch (const std::exception &e)
+    {
+        if (-1 == index_a)
+        {
+            delete lbi;
+        }
+        luaL_error(L, e.what());
+    }
+
+    if (-1 == index_a)
+    {
+        lua_pushlbigint(L, lbi);
+    }
+    else
+    {
+        lua_settop(L, index_a); // left the user data at stack top to return it
+    }
+    return 1;
+}
+
+static int div(lua_State *L)
+{
+    // 大整数有可能在左边，也有可能在右边
+    int index_a = 1;
+    int index_b = 2;
+    if (LUA_TUSERDATA != lua_type(L, 1))
+    {
+        index_a = 2;
+        index_b = 1;
+    }
+
+    lbigint *lbi = luaL_checklbigint(L, index_a);
+    // const variable, create a temporary variables
+    if (lbi->is_const())
+    {
+        index_a = -1;
+        lbi = new lbigint(*lbi);
+    }
+
+    int type = lua_type(L, index_b);
+    // wrap all in try catch to catch all error(e.g. division by zero)
+    try
+    {
+        if (LUA_TNUMBER == type)
+        {
+            *lbi /= lua_tointeger(L, index_b);
+        }
+        else if (LUA_TSTRING == type)
+        {
+
+            *lbi /= bigint_t(lua_tostring(L, index_b));
+        }
+        else if (LUA_TUSERDATA == type)
+        {
+            const bigint_t *lbi_o = luaL_checklbigint(L, index_b);
+
+            *lbi /= *lbi_o;
+        }
+        else
+        {
+            if (-1 == index_a)
+            {
+                delete lbi;
+            }
+            luaL_error(L,
+                       "can not convert %s to big integer",
+                       lua_typename(L, type));
+        }
+    }
+    catch (const std::exception &e)
+    {
+        if (-1 == index_a)
+        {
+            delete lbi;
+        }
+        luaL_error(L, e.what());
     }
 
     if (-1 == index_a)
@@ -399,6 +616,15 @@ int luaopen_lua_bigint(lua_State *L)
 
     lua_pushcfunction(L, add);
     lua_setfield(L, -2, "__add");
+
+    lua_pushcfunction(L, sub);
+    lua_setfield(L, -2, "__sub");
+
+    lua_pushcfunction(L, mul);
+    lua_setfield(L, -2, "__mul");
+
+    lua_pushcfunction(L, div);
+    lua_setfield(L, -2, "__div");
 
     lua_pushcfunction(L, __gc);
     lua_setfield(L, -2, "__gc");
