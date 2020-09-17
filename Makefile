@@ -58,6 +58,13 @@ $(TARGET_A): $(STATICOBJS)
 test: $(TARGET_SO)
 	lua test.lua
 
+memcheck: $(TARGET_SO)
+	 valgrind --leak-check=full --show-leak-kinds=all \
+	 	--suppressions=valgrind.suppressions \
+		--gen-suppressions=all \
+		lua test.lua
+
+
 # export BOOST_INC=../boost_1_74_0
 
 # install gmp: https://gmplib.org/
