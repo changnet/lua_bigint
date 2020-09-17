@@ -36,6 +36,14 @@ assert(lbigint(0) == 0)
 assert(lbigint(1) == 1) -- >0 return 1
 assert(lbigint(-1) == -1) -- <0 return -1
 
+-- compare
+assert(lbigint() > -1)
+assert(lbigint(100000000001) > "100000000000")
+assert(lbigint(100000000001) > lbigint(100000000000))
+
+-- unary minus
+assert(-lbigint(1) == -1)
+
 -- arithmetic + - * /
 
 ```

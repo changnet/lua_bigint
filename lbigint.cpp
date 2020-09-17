@@ -97,7 +97,7 @@ static int assign(lua_State *L)
     return 0;
 }
 
-// check two big int equip
+// check two big int equal
 static int equal(lua_State *L)
 {
     // in lua, a integer or string compare to a userdata, the userdata's __eq
@@ -110,14 +110,14 @@ static int equal(lua_State *L)
     int type = lua_type(L, 2);
     if (LUA_TNUMBER == type)
     {
-        e = (((bigint_t)*lbi) == lua_tointeger(L, 2));
+        e = ((*lbi) == lua_tointeger(L, 2));
     }
     else if (LUA_TSTRING == type)
     {
         try
         {
             const bigint_t bi_o(lua_tostring(L, 2));
-            e = (((bigint_t)*lbi) == bi_o);
+            e = ((*lbi) == bi_o);
         }
         catch (const std::exception &e)
         {
@@ -126,9 +126,9 @@ static int equal(lua_State *L)
     }
     else if (LUA_TUSERDATA == type)
     {
-        const lbigint *lbi_o = luaL_checklbigint(L, 2);
+        const bigint_t *lbi_o = luaL_checklbigint(L, 2);
 
-        e = (((bigint_t)*lbi) == ((bigint_t)*lbi_o));
+        e = ((*lbi) == (*lbi_o));
     }
     else
     {
@@ -138,6 +138,76 @@ static int equal(lua_State *L)
 
     // _const is not consider, just compare value
     lua_pushboolean(L, e);
+    return 1;
+}
+
+// check two big int less than
+static int less(lua_State *L)
+{
+    int index_a = 1;
+    int index_b = 2;
+    if (LUA_TUSERDATA != lua_type(L, 1))
+    {
+        index_a = 2;
+        index_b = 1;
+    }
+
+#define COMP(a, b) (1 == index_a ? ((a) < (b)) : ((b) < (a)))
+
+    const lbigint *lbi = luaL_checklbigint(L, index_a);
+
+    bool e = false;
+    int type = lua_type(L, index_b);
+    if (LUA_TNUMBER == type)
+    {
+        e = COMP(*lbi, lua_tointeger(L, index_b));
+    }
+    else if (LUA_TSTRING == type)
+    {
+        try
+        {
+            const bigint_t bi_o(lua_tostring(L, index_b));
+            e = COMP(*lbi, bi_o);
+        }
+        catch (const std::exception &e)
+        {
+            luaL_error(L, e.what());
+        }
+    }
+    else if (LUA_TUSERDATA == type)
+    {
+        const bigint_t *lbi_o = luaL_checklbigint(L, index_b);
+
+        e = COMP(*lbi, *lbi_o);
+    }
+    else
+    {
+        luaL_error(L,
+                   "can not convert %s to big integer", lua_typename(L, type));
+    }
+
+    // _const is not consider, just compare value
+    lua_pushboolean(L, e);
+    return 1;
+
+#undef COMP
+}
+
+// unary minus, the - operation
+static int unm(lua_State *L)
+{
+    lbigint *lbi = luaL_checklbigint(L, 1);
+
+    if (lbi->is_const())
+    {
+        return luaL_error(L, "attemp to modify a const big integer");
+    }
+
+    // -(*lbi);
+    lbi->backend().negate();
+
+    // return itself
+    lua_settop(L, 1);
     return 1;
 }
 
@@ -196,7 +266,7 @@ static int add(lua_State *L)
     }
     else if (LUA_TUSERDATA == type)
     {
-        bigint_t *lbi_o = luaL_checklbigint(L, index_b);
+        const bigint_t *lbi_o = luaL_checklbigint(L, index_b);
 
         *lbi += *lbi_o;
     }
@@ -247,7 +317,7 @@ static int __call(lua_State *L)
     }
     else if (LUA_TUSERDATA == type)
     {
-        lbigint *lbi_o = luaL_checklbigint(L, 2);
+        const lbigint *lbi_o = luaL_checklbigint(L, 2);
         obj = new lbigint(*lbi_o);
     }
     else
@@ -320,6 +390,12 @@ int luaopen_lua_bigint(lua_State *L)
 
     lua_pushcfunction(L, equal);
     lua_setfield(L, -2, "__eq");
+
+    lua_pushcfunction(L, less);
+    lua_setfield(L, -2, "__lt");
+
+    lua_pushcfunction(L, unm);
+    lua_setfield(L, -2, "__unm");
 
     lua_pushcfunction(L, add);
     lua_setfield(L, -2, "__add");

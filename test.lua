@@ -6,7 +6,8 @@ local function EQ(got, expect)
     print("got:", got)
     print("expect：", expect)
 
-    assert(false)
+    print(debug.traceback())
+    os.exit(1)
 end
 
 local function NEQ(got, expect)
@@ -15,7 +16,8 @@ local function NEQ(got, expect)
     print("got:", got)
     print("expect：", expect)
 
-    assert(false)
+    print(debug.traceback())
+    os.exit(1)
 end
 
 ------- /////////////////////////// construct ////////////////////////////////
@@ -28,7 +30,11 @@ local function test_construct(val, expect, msg)
 
     -- test error
     xpcall(function() lbigint(val) end, function(emsg)
-        asert(emsg == msg, emsg)
+        -- this is a anonymous function call
+        -- test.lua:32: Unexpected character encountered in input.
+        -- remove then file line
+        emsg = string.sub(emsg, string.len(emsg) - string.len(msg) + 1, -1)
+        EQ(emsg, msg)
     end, i, val)
 end
 
@@ -55,7 +61,7 @@ local function test_assign(val, expect, msg)
 
     -- test error assign
     xpcall(i.assign, function(emsg)
-        asert(emsg == msg, emsg)
+        EQ(emsg, msg)
     end, i, val)
 end
 
@@ -73,6 +79,11 @@ EQ(tostring(a0), "100000000000000000000000009")
 -- error test
 test_assign("ll", nil, "Unexpected character encountered in input.")
 test_assign(false, nil, "can not convert boolean to big integer")
+
+a0:set_const(true)
+xpcall(a0.assign, function(emsg)
+    EQ(emsg, "attemp to modify a const big integer")
+end, a0, 100)
 
 ------- /////////////////////////// equal //////////////////////////////////////
 EQ(lbigint(), lbigint())
@@ -97,6 +108,19 @@ EQ(lbigint(0):sign(), 0)
 EQ(lbigint(-1):sign(), -1)
 EQ(lbigint("-0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"):sign(), -1)
 EQ(lbigint("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"):sign(), 1)
+
+------- ///////////////////////// unary minus //////////////////////////////////
+EQ(tostring(-lbigint()), "0")
+EQ(tostring(-lbigint(1)), "-1")
+EQ(tostring(-lbigint("999999999999999999999999")), "-999999999999999999999999")
+EQ(tostring(-lbigint("-999999999999999999999999")), "999999999999999999999999")
+
+------- ///////////////////////// compare //////////////////////////////////////
+assert(lbigint() > -1)
+assert(1 < lbigint(2))
+assert(lbigint(100000000001) > "100000000000")
+assert("100000000000" < lbigint(100000000001))
+assert(lbigint(100000000001) > lbigint(100000000000))
 
 ------- /////////////////////////// add ////////////////////////////////////////
 local function test_add(v1, v2, expect, p)
