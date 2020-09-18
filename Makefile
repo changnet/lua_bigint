@@ -62,6 +62,7 @@ $(TARGET_A): $(STATICOBJS)
 
 test: $(TARGET_SO)
 	lua test.lua
+	lua perf.lua "lua_bigint"
 
 # valgrind report a at std::runtime_error, I checked the code but don't find anything
 # It seems to relate with this: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=39366
@@ -87,7 +88,14 @@ libperf:
 		./lib_perf/kasparsklavins/bigint.cpp \
 		./lib_perf/lib_perf.cpp \
 		-lgmpxx -lgmp
+	g++ -std=c++11 -g3 -O2 -shared -fPIC  -o jorjbauer.so \
+		./lib_perf/jorjbauer/BigInt.cpp \
+		./lib_perf/jorjbauer/mainlib.c \
+		./lib_perf/jorjbauer/bigint-glue.cpp
+
+	lua perf.lua "jorjbauer"
 	./test_lib_perf
+
 
 clean:
 	rm -f -R $(SHAREDDIR) $(STATICDIR) $(TARGET_SO) $(TARGET_A)
