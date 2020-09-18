@@ -32,5 +32,4 @@
 *.app
 
 test_lib_perf
-boost
 .vscode
