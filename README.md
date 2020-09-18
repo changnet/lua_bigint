@@ -4,9 +4,10 @@ Arbitrary integer for lua, base on [boost multiprecision](https://www.boost.org/
 ## Compile
 
 ### Linux
-1. install [lua](http://www.lua.org/)
+1. install [lua 5.3+](http://www.lua.org/)
 2. install [boost](https://www.boost.org/)
-3. make lua_bigint
+3. install GCC(>= C++11) 
+4. make lua_bigint
 ```shell
 git clone https://github.com/changnet/lua_bigint.git
 cd lua_bigint
@@ -14,6 +15,9 @@ make
 make test
 ```
 then `load lua_bigint.so` or `#include <lbigintxx.h> and link against -llua_bigint`, Enjoy!
+
+### Other platform
+Untested! But lua and boost are cross-platform, should not need too much adjustment.
 
 ### Using bundled boost
 Boost is a large library. However, multiprecision is header-only, only some
@@ -106,9 +110,10 @@ local c = a + 1000000 -- a still 1000000000
 
 ## lib_perf
 
+A simple performace test for serveral big integer library, 
+[here is the result](lib_perf/README.md). Files in lib_perf are irrelevant to
+this library.
 
 ## TODO
-* add license
 * performance test
 * ci build
-* bundled boost header

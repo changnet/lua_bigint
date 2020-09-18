@@ -8,8 +8,6 @@ typedef boost::multiprecision::cpp_int bigint_t;
 class lbigint : public bigint_t
 {
 public:
-    using bigint_t::operator=;
-
     explicit lbigint()
     {
         _const = false;
