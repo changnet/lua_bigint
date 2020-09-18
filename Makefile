@@ -4,8 +4,8 @@ CXX = g++
 
 TARGET_SO =         lua_bigint.so
 TARGET_A  =         liblua_bigint.a
-CFLAGS =            -std=c++11 -g3 -O0 -Wall -pedantic -fno-inline -I.
-# CFLAGS =            -std=c++11 -O2 -Wall -pedantic #-DNDEBUG
+# CFLAGS =            -std=c++11 -g3 -O0 -Wall -pedantic -fno-inline
+CFLAGS =            -std=c++11 -g -O2 -Wall -pedantic #-DNDEBUG
 
 SHAREDDIR = .sharedlib
 STATICDIR = .staticlib
@@ -26,7 +26,7 @@ DEPS := $(SHAREDOBJS + STATICOBJS:.o=.d)
 # doesn't exist (e.g. on first compilation)
 -include $(DEPS)
 
-.PHONY: all clean test staticlib sharedlib
+.PHONY: all bundled clean test staticlib sharedlib memcheck libperf
 
 $(SHAREDDIR)/%.o: %.cpp
 	@[ ! -d $(SHAREDDIR) ] & mkdir -p $(SHAREDDIR)
@@ -37,6 +37,11 @@ $(STATICDIR)/%.o: %.cpp
 	$(CXX) -c $(CFLAGS) -MMD -MP -MF"$(@:%.o=%.d)" -o $@ $<
 
 all: $(TARGET_SO) $(TARGET_A)
+
+# target-specific variable value
+# https://www.gnu.org/software/make/manual/make.html#Target_002dspecific
+bundled: CFLAGS += -I.
+bundled: all
 
 staticlib: $(TARGET_A)
 sharedlib: $(TARGET_SO)
@@ -58,6 +63,8 @@ $(TARGET_A): $(STATICOBJS)
 test: $(TARGET_SO)
 	lua test.lua
 
+# valgrind report a at std::runtime_error, I checked the code but don't find anything
+# It seems to relate with this: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=39366
 memcheck: $(TARGET_SO)
 	 valgrind --leak-check=full --show-leak-kinds=all \
 	 	--suppressions=valgrind.suppressions \

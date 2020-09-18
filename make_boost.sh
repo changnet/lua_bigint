@@ -22,7 +22,7 @@ LIST_F=$DST/BOOST_FILES
 
 function find_boost_header()
 {
-    msg=$(make 2>&1)
+    msg=$(make bundled 2>&1)
 
     F=`echo $msg \
     | grep -Eo 'fatal error: boost(.*): No such file or directory'\
@@ -50,3 +50,6 @@ for i in {1..1024}; do
         break
     fi
 done
+
+# copy LICENSE
+cp $SRC/LICENSE_1_0.txt $DST/boost

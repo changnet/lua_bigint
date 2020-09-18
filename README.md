@@ -1,5 +1,27 @@
 # lua_bigint
-big integer for lua
+Arbitrary integer for lua, base on [boost multiprecision](https://www.boost.org/doc/libs/1_74_0/libs/multiprecision/doc/html/boost_multiprecision/intro.html)
+
+## Compile
+
+### Linux
+1. install [lua](http://www.lua.org/)
+2. install [boost](https://www.boost.org/)
+3. make lua_bigint
+```shell
+git clone https://github.com/changnet/lua_bigint.git
+cd lua_bigint
+make
+make test
+```
+then `load lua_bigint.so` or `#include <lbigintxx.h> and link against -llua_bigint`, Enjoy!
+
+### Using bundled boost
+Boost is a large library. However, multiprecision is header-only, only some
+header files needed. All needed files are already being copy into directory 
+`boost` from `boost 1.74.0` by script `make_boost.sh`.
+
+run `make bundled` instead of `make` if using bundled boost. This only test
+under debian & gcc, other platform or complier may not work.
 
 ## Usage
 ```lua
@@ -52,7 +74,6 @@ assert(lbigint(1) + 1)
 assert(lbigint(1) - "100")
 assert(lbigint(1) * lbigint(100))
 local a = 1 + lbigint(2) - "3" * lbigint(4) / 100
-
 ```
 
 ## Mutable
@@ -83,9 +104,11 @@ a:set_const(true)
 local c = a + 1000000 -- a still 1000000000
 ```
 
+## lib_perf
+
+
 ## TODO
-```cpp
-    namespace mp = boost::multiprecision;
-    mp::cpp_int x = mp::pow(mp::cpp_int(2), 1024);
-    std::cout << x << "\n";
-```
+* add license
+* performance test
+* ci build
+* bundled boost header

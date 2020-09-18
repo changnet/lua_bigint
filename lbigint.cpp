@@ -1,4 +1,5 @@
 #include "lbigint.h"
+#include "lbigintxx.h"
 
 #define LIB_NAME "lua_bigint"
 
