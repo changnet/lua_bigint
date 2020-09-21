@@ -83,11 +83,11 @@ memcheck: $(TARGET_SO)
 # make check
 # make install
 libperf:
-	g++ -std=c++11 -I$(BOOST_INC) -Wall -g3 -O2 -o test_lib_perf \
-		./lib_perf/kedixa/unsigned_bigint.cpp \
-		./lib_perf/kasparsklavins/bigint.cpp \
-		./lib_perf/lib_perf.cpp \
-		-lgmpxx -lgmp
+	# g++ -std=c++11 -I$(BOOST_INC) -Wall -g3 -O2 -o test_lib_perf \
+	# 	./lib_perf/kedixa/unsigned_bigint.cpp \
+	# 	./lib_perf/kasparsklavins/bigint.cpp \
+	# 	./lib_perf/lib_perf.cpp \
+	# 	-lgmpxx -lgmp
 	g++ -std=c++11 -g3 -O2 -shared -fPIC  -o jorjbauer.so \
 		./lib_perf/jorjbauer/BigInt.cpp \
 		./lib_perf/jorjbauer/mainlib.c \

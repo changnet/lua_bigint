@@ -1,6 +1,18 @@
 local NAME = ...
 local lbigint = require(NAME)
 
+-- /////////////////////////////////////////////////////////////////////////////
+-- compatible
+local mt = getmetatable(lbigint) or lbigint
+if not mt.__call then
+    mt.__call = mt.new
+end
+
+if not mt.set_const then
+    mt.set_const = function() end
+end
+setmetatable(lbigint, mt)
+-- /////////////////////////////////////////////////////////////////////////////
 local MUL_BIT = 1000
 local BASE_BIT = 10000
 local TEST_TIMES = 10000

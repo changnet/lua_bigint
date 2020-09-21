@@ -125,3 +125,24 @@ gmp div time elapsed 1176us
 gmp to_string time elapsed 1564us
 test done, TIMES = 10, BASE BIT = 10000, MUL BIT = 1000
 ```
+
+## Lua library(jorjbauer can not finish tostring test, take too much time)
+```
+lua perf.lua "jorjbauer"
+jorjbauer       create  time elapsed    153.940979
+jorjbauer       add     time elapsed    0.060060000000021
+jorjbauer       dec     time elapsed    0.051821999999987
+jorjbauer       mul     time elapsed    4.210832
+jorjbauer       div     time elapsed    330.919889
+^C
+
+
+lua perf.lua "lua_bigint"
+lua_bigint      create  time elapsed    2.125623
+lua_bigint      add     time elapsed    0.040111
+lua_bigint      dec     time elapsed    0.030957
+lua_bigint      mul     time elapsed    0.684405
+lua_bigint      div     time elapsed    8.447397
+lua_bigint      tostring        time elapsed    152.951704
+lua_bigint perf done, TIMES = 10000, BASE BIT = 10000, MUL BIT = 1000
+```
