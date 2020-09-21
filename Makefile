@@ -61,6 +61,8 @@ $(TARGET_A): $(STATICOBJS)
 	$(RANLIB) $@
 
 test: $(TARGET_SO)
+	g++ -std=c++11 -g -o test test.cpp -L. -llua_bigint -llua -ldl
+	./test test.lua
 	lua test.lua
 	lua perf.lua "lua_bigint"
 
@@ -83,11 +85,11 @@ memcheck: $(TARGET_SO)
 # make check
 # make install
 libperf:
-	# g++ -std=c++11 -I$(BOOST_INC) -Wall -g3 -O2 -o test_lib_perf \
-	# 	./lib_perf/kedixa/unsigned_bigint.cpp \
-	# 	./lib_perf/kasparsklavins/bigint.cpp \
-	# 	./lib_perf/lib_perf.cpp \
-	# 	-lgmpxx -lgmp
+	g++ -std=c++11 -I$(BOOST_INC) -Wall -g3 -O2 -o test_lib_perf \
+		./lib_perf/kedixa/unsigned_bigint.cpp \
+		./lib_perf/kasparsklavins/bigint.cpp \
+		./lib_perf/lib_perf.cpp \
+		-lgmpxx -lgmp
 	g++ -std=c++11 -g3 -O2 -shared -fPIC  -o jorjbauer.so \
 		./lib_perf/jorjbauer/BigInt.cpp \
 		./lib_perf/jorjbauer/mainlib.c \

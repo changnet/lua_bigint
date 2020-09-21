@@ -31,5 +31,6 @@
 *.out
 *.app
 
+test
 test_lib_perf
 .vscode

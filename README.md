@@ -14,7 +14,13 @@ cd lua_bigint
 make
 make test
 ```
-then `load lua_bigint.so` or `#include <lbigintxx.h> and link against -llua_bigint`, Enjoy!
+then load `lua_bigint.so` from lua script or open it in C++
+```cpp
+#include <lbigintxx.h>
+
+open_lua_bigint(L); // link against -llua_bigint
+```
+Enjoy!
 
 ### Other platform
 Untested! But lua and boost are cross-platform, should not need too much adjustment.

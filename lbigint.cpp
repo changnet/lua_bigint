@@ -670,3 +670,15 @@ int luaopen_lua_bigint(lua_State *L)
 
     return 1; /* return metatable */
 }
+
+void open_lua_bigint(lua_State *L)
+{
+    lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
+    if (!lua_istable(L, -1))
+    {
+        assert(false);
+    }
+
+    luaopen_lua_bigint(L);
+    lua_setfield(L, -2, LIB_NAME);
+}
