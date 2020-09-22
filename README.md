@@ -25,7 +25,8 @@ open_lua_bigint(L); // link against -llua_bigint
 Enjoy!
 
 ### Other platform
-Untested! But lua and boost are cross-platform, should not need too much adjustment.
+Untested! But lua and boost are both cross-platform, should not need too much
+adjustment.
 
 ### Using bundled boost
 Boost is a large library, download and complie it would take some time. However,
@@ -119,12 +120,9 @@ a:set_const(true)
 local c = a + 1000000 -- a still 1000000000
 ```
 
-## lib_perf
-
+## libperf
 A simple performace test for serveral big integer library, 
-[here is the result](lib_perf/README.md). Files in lib_perf are irrelevant to
-this library.
+[here is the result](lib_perf/README.md). command `make libperf` will run this
+test(if all dependencies are installed).
 
-## TODO
-* performance test
-* ci build
+Files in `lib_perf` are irrelevant to this library, feel free to remove them.
