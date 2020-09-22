@@ -33,6 +33,17 @@ local m = lbigint(str_mul)
 b:set_const(true)
 m:set_const(true)
 
+local beg = os.clock()
+for i = 1, TEST_TIMES do local x = b < m end
+print(NAME, "<", "time elapsed", os.clock() - beg)
+
+-- do NOT have a __le implement now
+-- it use a __lt instead, slower than a real __le
+-- from the test result, it is not that slow
+local beg = os.clock()
+for i = 1, TEST_TIMES do local x = b <= m end
+print(NAME, "<=", "time elapsed", os.clock() - beg)
+
 -- create
 local beg = os.clock()
 for i = 1, TEST_TIMES do lbigint(str_base) end
