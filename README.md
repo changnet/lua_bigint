@@ -1,4 +1,6 @@
 # lua_bigint
+[![Build Status](https://travis-ci.org/changnet/lua_bigint.svg?branch=master)](https://travis-ci.org/changnet/lua_bigint)
+
 Arbitrary integer for lua, base on [boost multiprecision](https://www.boost.org/doc/libs/1_74_0/libs/multiprecision/doc/html/boost_multiprecision/intro.html)
 
 ## Compile
@@ -26,12 +28,14 @@ Enjoy!
 Untested! But lua and boost are cross-platform, should not need too much adjustment.
 
 ### Using bundled boost
-Boost is a large library. However, multiprecision is header-only, only some
-header files needed. All needed files are already being copy into directory 
-`boost` from `boost 1.74.0` by script `make_boost.sh`.
+Boost is a large library, download and complie it would take some time. However,
+multiprecision is header-only, there is no need to complie boost. All needed
+files are already being copy into directory `boost` from `boost 1.74.0` by shell
+script `make_boost.sh`.
 
 run `make bundled` instead of `make` if using bundled boost. This only test
-under debian & gcc, other platform or complier may not work.
+under debian & gcc, other platform or complier may not work, likely missing
+header files. I bundled it just for some special test.
 
 ## Usage
 ```lua
@@ -103,8 +107,9 @@ If `a` is immutable, a temporary variable will be cloned from `a`, and the clone
 process is quit slow. in this case the `a` is expected to be mutable, the cloned
 is total waste of time.
 
-As default, in any big integer arithmetic, variables are all mutable, unless they
-are immutable(use `set_const(true)`) or create a temporary variable manually. e.g.
+As default, any big integer arithmetic in this library, big integer are all
+mutable, unless they are immutable(use `set_const(true)`). Create a temporary
+variable manually if not intent to change the original variable. e.g.
 ```lua
 local a = lbigint("1000000000")
 
