@@ -110,7 +110,8 @@ is total waste of time.
 
 As default, any big integer arithmetic in this library, big integer are all
 mutable, unless they are immutable(use `set_const(true)`). Create a temporary
-variable manually if not intent to change the original variable. e.g.
+variable manually if not intent to change the original variable. If multiple big
+integer in one expression, only the first big integer is mutable. e.g.
 ```lua
 local a = lbigint("1000000000")
 
@@ -118,10 +119,12 @@ local d = lbigint(a) + 10000000 -- create a temporary variable manually
 
 a:set_const(true)
 local c = a + 1000000 -- a still 1000000000
+
+local i = i0 + i1 + i2 -- i0 is mutable, i1、i2 is immutable
 ```
 
 ## libperf
-A simple performace test for serveral big integer library, 
+A simple performace test for several big integer library, 
 [here is the result](lib_perf/README.md). command `make libperf` will run this
 test(if all dependencies are installed).
 
